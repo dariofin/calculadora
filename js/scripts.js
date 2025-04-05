@@ -1,126 +1,104 @@
 // variables globales
+let displayCero; // 👈🏽  variable para saber si el display tiene un 0
 let resultado;
 let valorActual;
-let valorAcumulado;
-let operacionEsperaValor = false;
+let registroOperacion;
 // variables RegExp
 const rgExNum = /^\d/; //👈🏽 busco caracteres numéricos
 const rgExTxt = /[a-zÇ\'\¡]/i; // 👈🏽  busco caractéres alfabéticos
 const regExOper = /[+\-*\/%]/; // 👈🏽  busco los operadores
 
-// ⬜️ obtengo elementos del DOM
-// #️⃣ DIGITOS
-// capturo el digito principal del display
+// ⬜️ OBTENGO ELEMENTOS DEL DOM
+
+// capturo el contenedor de la calculadora
+const contenedorCalc = document.getElementById("calculadora-container");
+// capturo el display de la calculadora
+const display = document.getElementById("display");
+// capturo los dígitos del display
 const digitoDisplay = document.getElementById("digito-display");
 digitoDisplay.value = "0";
-valorActual = digitoDisplay.value;
+displayCero = true; // 👈🏽  inicializo la variable en true para saber si el display tiene un 0
 
 // capturo el digito del operador dentro del display
-const digitoOperador = document.getElementById("digito-operador");
-let operadorActual = digitoOperador.value;
-digitoOperador.value = "";
+const digitoRegistro = document.getElementById("digito-operador");
+digitoRegistro.value = null;
 
-// ⚠️ BOTONES
-// capturo todos los botones en un HTMLcollection y lo convierto a array
-const botones = Array.from(
-  document.getElementsByClassName("calculadora-tecla")
-);
-// Agrego listeners a todos los botones
-botones.map((boton) =>
-  boton.addEventListener("click", () => PulseDetect(boton.outerText))
-);
-// console.log(botones);
+// capturo los botones de la calculadora y le agrego un event listener
+const teclas = document.querySelectorAll(".calculadora-tecla");
+teclas.forEach((tecla) => {
+  tecla.addEventListener("click", () => {
+    HandlerDisplay(tecla.id);
+  });
+});
+
+function HandlerDisplay(key) {
+  // si el display tiene un 0 y el key es un número lo reemplazo por el número
+  if (digitoDisplay.value === "0" && rgExNum.test(key) && displayCero) {
+    digitoDisplay.value = key;
+    digitoRegistro.value = digitoDisplay.value;
+    displayCero = false;
+    //
+  } else if (rgExNum.test(key)) {
+    /* RECIBO NUMERO */
+    digitoDisplay.value += key;
+    digitoRegistro.value = digitoDisplay.value;
+    return;
+
+    //
+  } else if (key === "Clear") {
+    /* RECIBO AC */
+    digitoDisplay.value = "0";
+    digitoRegistro.value = "";
+    displayCero = true; //
+    // console.log("presionaste AC");
+  }
+  // si el key es un operador y el display no tiene un 0 lo concateno al display
+  /* RECIBO OPERADOR */
+  else if (regExOper.test(key) && !displayCero) {
+    regExOper.test(digitoDisplay.value[digitoDisplay.value.length - 1])
+      ? console.log(digitoDisplay.value[digitoDisplay.value.length - 1])
+      : (digitoDisplay.value += key);
+  }
+  // si el key es igual a "Enter" o "=" evalúo la operación
+  else if (key === "Enter" || key === "=") {
+    // evalúo la operación
+    resultado = eval(digitoRegistro.value);
+    digitoRegistro.value = digitoRegistro.value + "=" + resultado;
+    digitoDisplay.value = resultado;
+    displayCero = true; // 👈🏽  inicializo la variable en true para saber si el display tiene un 0
+  }
+}
+
+// escucho el teclado y filtro las teclas presionadas busando coincidencias del innerText del elemento con la tecla presionada
+// les agrego la clase hover para que se vea el efecto de la tecla presionada
+// onkeydown = (event) => {
+
+//   let key = event.key;
+//   console.log("la tecla presionada es " + key);
+//   teclas.forEach((tecla) => {
+//     if (key === tecla.id) {
+//       tecla.classList.add("hover");
+//       HandlerDisplay(key);
+//       setTimeout(() => {
+//         tecla.classList.remove("hover");
+//       }, 200);
+//     }
+//   });
+// };
 
 // ⚠️ ANALIZO EL INPUT
-function PulseDetect(key) {
-  key === "Enter"
-    ? HandlerOp("=") // console.log("presionaste ENTER")
-    : //
-    key === "AC" // borro display
-    ? HandlerOp("AC")
-    : //
-    rgExNum.test(key)
-    ? HandlerNum(parseFloat(key)) //console.log(key + " es un número ")
-    : //
-    regExOper.test(key)
-    ? HandlerOp(key) // console.log(key + " es un operador")
-    : //
-      console.log(key + " NO SE LO QUE ES");
-}
-
-// 👂🏼 detecto el tipo de caracter pulsado en el teclado
-onkeydown = (event) => {
-  let key = event.key;
-  key === "Enter"
-    ? HandlerOp("=") // console.log("presionaste ENTER")
-    : key === "Clear"
-    ? (digitoDisplay.value = "0")
-    : rgExNum.test(key)
-    ? HandlerNum(parseFloat(key)) //console.log(key + " es un número ")
-    : regExOper.test(key)
-    ? HandlerOp(key, valorActual) // console.log(key + " es un operador")
-    : rgExTxt.test(key)
-    ? console.log(key + " es un TEXTO ")
-    : console.log(key + " NO SE LO QUE ES");
-};
-
-onkeyup = (event) => {
-  //acá voy a togglear las clases hover en los botones
-  console.log(event.code);
-  console.log(
-    "el valor del display es 👉🏼 " +
-      digitoDisplay.value +
-      " ⦂ " +
-      typeof digitoDisplay.value
-  );
-  console.log("el valorActual es " + valorActual + " " + typeof valorActual);
-  console.log(
-    "el valor Acumulado es " + valorAcumulado + " " + typeof valorAcumulado
-  );
-};
-
-// 🖐 PROCESA NUMEROS
-function HandlerNum(key) {
-  // console.log("el key llega como " + typeof key); //
-  if (digitoDisplay.value === "0") {
-    digitoDisplay.value = key;
-    valorActual = parseFloat(key);
-  } else {
-    // valorActual = valorActual + key;
-    digitoDisplay.value = digitoDisplay.value + key;
-    valorActual = parseFloat(digitoDisplay.value);
-  }
-}
-
-// 🖐 OPERACIONES
-function HandlerOp(operador, valorActual) {
-  operacionEsperaValor = true;
-  // si presiona +
-  if (operador === "+") {
-    digitoOperador.value = "+";
-  }
-  // key === "+" ? Sumar(valorActual) : console.log("nine");
-
-  // key === "="
-  //   ? (digitoDisplay.value = valorActual)
-  //   : key === "AC"
-  //   ? (digitoDisplay.value = "0")
-  //   : (digitoDisplay.value = digitoDisplay.value + key);
-}
-
-function HoverToggle(key) {
-  document.getElementById(key)
-    ? document.getElementById(key).classList.toggle("hover")
-    : console.log("no");
-}
-
-//recorro los botones y le agrego un event listener
-
-// ⚠️ OPERACIONES
-function Sumar(...value) {
-  value.length == 1
-    ? (digitoDisplay.value = value[0])
-    : (valorAcumulado = parseFloat(value[0]) + parseFloat(value[1]));
-}
-
-console.log("el valor del display es 👉🏼 " + digitoDisplay.value);
+// function PulseDetect(key) {
+//   // key === "Enter"
+//   //   ? HandlerOp("=") // console.log("presionaste ENTER")
+//   //   : //
+//   //   key === "AC" // borro display
+//   //   ? HandlerOp("AC")
+//   //   : //
+//   //   rgExNum.test(key)
+//   //   ? HandlerNum(parseFloat(key)) //console.log(key + " es un número ")
+//   //   : //
+//   //   regExOper.test(key)
+//   //   ? HandlerOp(key) // console.log(key + " es un operador")
+//   //   : //
+//   //     console.log(key + " NO SE LO QUE ES");
+// }
