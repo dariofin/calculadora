@@ -39,33 +39,52 @@ function HandlerDisplay(key) {
     displayCero = false;
     //
   } else if (rgExNum.test(key)) {
-    /* RECIBO NUMERO */
+    /* ↘️ RECIBO NUMERO */
     digitoDisplay.value += key;
     digitoRegistro.value = digitoDisplay.value;
     return;
-
     //
+  } else if (key === "." || key === ",") {
+    /* ↘️ RECIBO SEPARADOR DE DECIMALES */
+
+    digitoDisplay.value += ".";
+    digitoRegistro.value = digitoDisplay.value;
   } else if (key === "Clear") {
-    /* RECIBO AC */
+    /* ↘️ RECIBO AC */
     digitoDisplay.value = "0";
     digitoRegistro.value = "";
     displayCero = true; //
     // console.log("presionaste AC");
+  } else if (key === "Backspace") {
+    /* ↘️ RECIBO BACKSPACE */
+    digitoDisplay.value = digitoDisplay.value.slice(0, -1);
+    if (digitoDisplay.value.length === 0) {
+      digitoDisplay.value = "0";
+      displayCero = true;
+    }
+    return;
   }
+
   // si el key es un operador y el display no tiene un 0 lo concateno al display
-  /* RECIBO OPERADOR */
+  /* ↘️ RECIBO OPERADOR */
   else if (regExOper.test(key) && !displayCero) {
-    regExOper.test(digitoDisplay.value[digitoDisplay.value.length - 1])
-      ? console.log(digitoDisplay.value[digitoDisplay.value.length - 1])
-      : (digitoDisplay.value += key);
+    let ultimodigito = digitoDisplay.value[digitoDisplay.value.length - 1];
+    console.log("el ultimo digito  es " + ultimodigito);
+    console.log("el key es " + key);
+    if (ultimodigito === key) {
+      // si el operador es igual al último dígito lo reemplazo por el nuevo operador
+      digitoDisplay.value = digitoDisplay.value.slice(0, -1) + key;
+    } else {
+      digitoDisplay.value = digitoDisplay.value + key;
+    }
   }
+
   // si el key es igual a "Enter" o "=" evalúo la operación
   else if (key === "Enter" || key === "=") {
     // evalúo la operación
     resultado = eval(digitoRegistro.value);
     digitoRegistro.value = digitoRegistro.value + "=" + resultado;
     digitoDisplay.value = resultado;
-    displayCero = true; // 👈🏽  inicializo la variable en true para saber si el display tiene un 0
   }
 }
 
