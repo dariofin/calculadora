@@ -31,6 +31,8 @@ teclas.forEach((tecla) => {
   });
 });
 
+// ⬜️ MANEJO LOS EVENTOS
+
 function HandlerDisplay(key) {
   // si el display tiene un 0 y el key es un número lo reemplazo por el número
   if (digitoDisplay.value === "0" && rgExNum.test(key) && displayCero) {
@@ -88,21 +90,11 @@ function HandlerDisplay(key) {
   }
 }
 
-// escucho el teclado y filtro las teclas presionadas busando coincidencias del innerText del elemento con la tecla presionada
-// les agrego la clase hover para que se vea el efecto de la tecla presionada
-// onkeydown = (event) => {
-
-//   let key = event.key;
-//   console.log("la tecla presionada es " + key);
-//   teclas.forEach((tecla) => {
-//     if (key === tecla.id) {
-//       tecla.classList.add("hover");
-//       HandlerDisplay(key);
-//       setTimeout(() => {
-//         tecla.classList.remove("hover");
-//       }, 200);
-//     }
-//   });
+// ⬜️ ESCUCHO LOS EVENTOS DEL TECLADO
+onkeydown = (event) => {
+  const key = event.key;
+  HandlerDisplay(key);
+};
 // };
 
 // ⚠️ ANALIZO EL INPUT
